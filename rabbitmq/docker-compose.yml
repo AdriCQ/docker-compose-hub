@@ -1,0 +1,20 @@
+services:
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    container_name: 'rabbitmq'
+    ports:
+      - ${PORT}:5672
+      - ${ADMIN_PORT}:15672
+    volumes:
+      - data:/var/lib/rabbitmq/
+      - log:/var/log/rabbitmq
+    networks:
+      - public-network
+
+networks:
+  public-network:
+    external: true
+
+volumes:
+  data:
+  log:

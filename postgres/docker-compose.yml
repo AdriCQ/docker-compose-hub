@@ -1,0 +1,51 @@
+services:
+  # PostgreSQL service
+  postgres:
+    image: postgres:16-alpine
+    container_name: postgres
+    environment:
+      # PostgreSQL database
+      POSTGRES_DB: ${POSTGRES_DB}
+      # PostgreSQL username
+      POSTGRES_USER: ${POSTGRES_USER}
+      # SPostgreSQL password
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    ports:
+      - "${POSTGRES_PORT}:5432"
+    volumes:
+      # Mount a volume to persist PostgreSQL data
+      - data:/var/lib/postgresql/data
+    networks:
+      - public-network
+    restart: always
+
+  # pgAdmin 4 service
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: pgadmin
+    environment:
+      # Default email for pgAdmin 4
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL}
+      # Password for pgAdmin 4
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD}
+    ports:
+      # Map host port 5050 to container port 80
+      - "${PGADMIN_PORT}:80"
+    volumes:
+      # Mount a volume to persist pgAdmin 4 data
+      - pgadmin_data:/var/lib/pgadmin
+    depends_on:
+      # Ensure that this service starts after 'db'
+      - postgres
+    networks:
+      - public-network
+    restart: always
+
+# bridge driver for the custom network
+networks:
+  public-network:
+    external: true
+
+volumes:
+  data:
+  pgadmin_data:

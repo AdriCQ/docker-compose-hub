@@ -1,0 +1,51 @@
+services:
+  kong-migration:
+    image: kong:3.3.1-alpine
+    container_name: kong-migration
+    command: "kong migrations bootstrap"
+    environment:
+      KONG_DATABASE: postgres
+      KONG_PG_HOST: ${KONG_PG_HOST}
+      KONG_PG_DATABASE: ${KONG_PG_DATABASE}
+      KONG_PG_USER: ${KONG_PG_USER}
+      KONG_PG_PASSWORD: ${KONG_PG_PASSWORD}
+    networks:
+      - public-network
+
+  kong:
+    image: kong:3.3.1-alpine
+    container_name: kong
+    depends_on:
+      - kong-migration
+    environment:
+      KONG_DATABASE: postgres
+      KONG_PG_HOST: ${KONG_PG_HOST}
+      KONG_PG_DATABASE: ${KONG_PG_DATABASE}
+      KONG_PG_USER: ${KONG_PG_USER}
+      KONG_PG_PASSWORD: ${KONG_PG_PASSWORD}
+      KONG_PROXY_LISTEN: 0.0.0.0:8000
+      KONG_PROXY_LISTEN_SSL: 0.0.0.0:8443
+      KONG_ADMIN_LISTEN: 0.0.0.0:8001
+    ports: []
+      # - "8000:8000"
+      # - "8443:8443"
+      # - "8001:8001"
+    networks:
+      - public-network
+      
+  konga:
+    image: pantsel/konga
+    ports: []
+      # - ${KONGA_PORT}:1337
+    links:
+      - kong:kong
+    container_name: konga
+    environment:
+      - NODE_ENV=production
+    networks:
+      - public-network
+
+networks:
+  public-network:
+    external: true
+      
